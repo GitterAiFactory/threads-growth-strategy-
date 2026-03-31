@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스레드 팔로워 폭발성장전략 2026</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root {
+  --bg: #ffffff;
+  --bg-soft: #f5f5f6;
+  --bg-dark: #18181b;
+  --accent: #ff4d00;
+  --accent-light: #fff1ec;
+  --accent-dark: #cc3d00;
+  --blue: #2563eb;
+  --green: #059669;
+  --green-light: #ecfdf5;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --yellow: #d97706;
+  --yellow-light: #fffbeb;
+  --text: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
+  --gray-icon: #71717a;
+  --gray-icon-bg: #f0f0f2;
+  --border: #e4e4e7;
+  --border-light: #f0f0f2;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  font-family: 'Gothic A1', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+.container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+
+/* NAV */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-light);
+  padding: 14px 0;
+}
+
+.nav-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-brand { font-size: 13px; font-weight: 700; color: var(--accent); }
+
+.nav-links { display: flex; gap: 20px; list-style: none; }
+.nav-links a { font-size: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+
+@media (max-width: 640px) { .nav-links { display: none; } }
+
+/* ICON SHAPES */
+.icon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon svg { width: 20px; height: 20px; }
+
+/* HERO */
+.hero {
+  padding: 96px 0 72px;
+  text-align: center;
+  position: relative;
+}
+
+.hero-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 100px;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 28px;
+}
+
+.hero-label::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.hero h1 {
+  font-size: clamp(36px, 7vw, 64px);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -2px;
+  margin-bottom: 18px;
+}
+
+.hero h1 span { color: var(--accent); }
+
+.hero-sub {
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  max-width: 480px;
+  margin: 0 auto 40px;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 1px;
+  justify-content: center;
+  background: var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.hero-stat {
+  flex: 1;
+  background: var(--bg-soft);
+  padding: 18px 14px;
+  text-align: center;
+}
+
+.hero-stat:first-child { border-radius: 14px 0 0 14px; }
+.hero-stat:last-child { border-radius: 0 14px 14px 0; }
+
+.hero-stat .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.hero-stat .label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* SECTIONS */
+section { padding: 72px 0; }
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.section-title {
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin-bottom: 10px;
+  line-height: 1.25;
+}
+
+.section-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  max-width: 540px;
+  margin-bottom: 36px;
+}
+
+.divider { width: 100%; height: 1px; background: var(--border); }
+
+/* KPI */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 28px 0;
+}
+
+.kpi-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+}
+
+.kpi-item .value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.kpi-item .label { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+
+/* HIGHLIGHT */
+.highlight {
+  background: var(--accent-light);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 10px 10px 0;
+  padding: 22px 24px;
+  margin: 28px 0;
+}
+
+.highlight h4 { font-size: 13px; font-weight: 700; color: var(--accent-dark); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.highlight p { font-size: 13px; color: var(--text-secondary); line-height: 1.8; }
+.highlight em { color: var(--accent); font-style: normal; font-weight: 700; }
+
+/* ALGO */
+.algo-list { display: flex; flex-direction: column; gap: 8px; }
+
+.algo-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.algo-rank {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 32px;
+}
+
+.algo-body h4 { font-size: 14px; font-weight: 700; margin-bottom: 1px; }
+.algo-body p { font-size: 12px; color: var(--text-secondary); }
+
+.algo-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+.badge-critical { background: #fef2f2; color: var(--red); }
+.badge-high { background: var(--accent-light); color: var(--accent); }
+.badge-medium { background: var(--yellow-light); color: var(--yellow); }
+
+/* 80/20 BAR */
+.ratio-bar {
+  display: flex;
+  height: 36px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 18px 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ratio-major { flex: 4; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; }
+.ratio-minor { flex: 1; background: var(--bg-soft); color: var(--text-secondary); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+
+/* STRATEGY CARDS */
+.strategy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.s-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: border-color 0.2s;
+}
+
+.s-card:hover { border-color: var(--accent); }
+
+.s-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.s-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--gray-icon-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.s-card-icon svg { width: 18px; height: 18px; stroke: var(--gray-icon); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.s-card-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.s-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.s-card p { font-size: 12px; color: var(--text-secondary); line-height: 1.75; }
+
+.impact {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.impact-max { background: #fef2f2; color: var(--red); }
+.impact-high { background: var(--accent-light); color: var(--accent); }
+
+/* TIMELINE */
+.tl { position: relative; padding-left: 32px; }
+
+.tl::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.tl-item {
+  position: relative;
+  margin-bottom: 20px;
+  padding: 20px 22px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: -28px;
+  top: 24px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gray-icon);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.tl-day {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gray-icon);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.tl-item h3 { font-size: 15px; font-weight: 700; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+.tl-item p { font-size: 12px; color: var(--text-secondary); line-height: 1.75; }
+
+.tl-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+
+.tl-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--bg-soft);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+/* FORMULAS */
+.formula {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 12px;
+}
+
+.formula h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.formula .desc { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+
+.formula-example {
+  background: var(--bg-soft);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.9;
+  border-left: 3px solid var(--border);
+}
+
+/* TABLE */
+.timing-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 13px;
+}
+
+.timing-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-bottom: 2px solid var(--border);
+  font-weight: 700;
+}
+
+.timing-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.td-bold { font-weight: 700; }
+.td-mono { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 12px; }
+.td-accent { color: var(--accent); }
+.td-green { color: var(--green); }
+
+/* CHECKLIST */
+.checklist { list-style: none; }
+
+.checklist li {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-light);
+  align-items: flex-start;
+}
+
+.check-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-icon);
+  min-width: 56px;
+  flex-shrink: 0;
+}
+
+.check-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+
+/* DO DONT */
+.do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 640px) { .do-dont { grid-template-columns: 1fr; } }
+
+.do-box, .dont-box { border-radius: 12px; padding: 22px; }
+.dont-box { background: var(--red-light); border: 1px solid #fecaca; }
+.do-box { background: var(--green-light); border: 1px solid #a7f3d0; }
+.do-box h3 { color: var(--green); font-size: 14px; margin-bottom: 8px; }
+.dont-box h3 { color: var(--red); font-size: 14px; margin-bottom: 8px; }
+.do-box p, .dont-box p { font-size: 12px; color: var(--text-secondary); line-height: 1.8; }
+
+/* BOOSTERS */
+.booster-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+
+.booster {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.booster-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--gray-icon-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.booster-icon svg { width: 16px; height: 16px; stroke: var(--gray-icon); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.booster h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.booster p { font-size: 11px; color: var(--text-secondary); line-height: 1.7; }
+
+/* SCENARIOS */
+.scenario-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+@media (max-width: 640px) { .scenario-grid { grid-template-columns: 1fr; } }
+
+.scenario { border-radius: 10px; padding: 20px; text-align: center; }
+.scenario-best { background: var(--green-light); border: 1px solid #a7f3d0; }
+.scenario-base { background: #eff4ff; border: 1px solid #bfdbfe; }
+.scenario-worst { background: var(--bg-soft); border: 1px solid var(--border); }
+
+.scenario h4 { font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--text-secondary); }
+.scenario .s-num { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.scenario-best .s-num { color: var(--green); }
+.scenario-base .s-num { color: var(--blue); }
+.scenario-worst .s-num { color: var(--text-muted); }
+.scenario p { font-size: 11px; color: var(--text-secondary); }
+
+/* SUMMARY */
+.summary-box {
+  background: var(--bg-dark);
+  border-radius: 16px;
+  padding: 32px 28px;
+  color: #fff;
+}
+
+.summary-box h3 { font-size: 22px; font-weight: 900; margin-bottom: 20px; letter-spacing: -0.5px; }
+
+.summary-row {
+  display: flex;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-size: 13px;
+  align-items: flex-start;
+}
+
+.summary-label { color: var(--accent); font-weight: 700; min-width: 100px; flex-shrink: 0; font-size: 12px; }
+.summary-val { color: rgba(255,255,255,0.75); line-height: 1.7; }
+
+/* FOOTER */
+.footer { text-align: center; padding: 44px 0; border-top: 1px solid var(--border); }
+.footer p { font-size: 11px; color: var(--text-muted); }
+.footer-brand { color: var(--accent); font-weight: 700; }
+
+strong { font-weight: 700; }
+
+@media (max-width: 640px) {
+  .algo-item { flex-wrap: wrap; }
+  .algo-badge { margin-left: 46px; margin-top: 4px; }
+  .summary-row { flex-direction: column; gap: 2px; }
+  .summary-label { min-width: auto; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">스레드 폭발성장전략</div>
+    <ul class="nav-links">
+      <li><a href="#algorithm">알고리즘</a></li>
+      <li><a href="#strategy">전략</a></li>
+      <li><a href="#timeline">실행플랜</a></li>
+      <li><a href="#content">콘텐츠</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-label">2026년 4월 최신 알고리즘 분석</div>
+    <h1>스레드 팔로워<br><span>폭발성장전략</span></h1>
+    <p class="hero-sub">메타 알고리즘 데이터 분석 기반,<br>7일 안에 팔로워를 폭발적으로 늘리는 실전 전략 가이드</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">4억+</div><div class="label">글로벌 MAU</div></div>
+      <div class="hero-stat"><div class="num">6.25%</div><div class="label">평균 참여율</div></div>
+      <div class="hero-stat"><div class="num">73.6%</div><div class="label">X 대비 참여율↑</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- 시장 현황 -->
+<section>
+  <div class="container">
+    <div class="section-label">00 — Market</div>
+    <div class="section-title">지금 스레드가 기회인 이유</div>
+    <div class="section-desc">2026년 4월 기준, 스레드는 모바일 DAU에서 X를 추월했고 한국에서도 692만 MAU를 기록하며 가장 빠르게 성장하는 텍스트 플랫폼이 됐다.</div>
+
+    <div class="kpi-strip">
+      <div class="kpi-item"><div class="value">692만</div><div class="label">한국 MAU</div></div>
+      <div class="kpi-item"><div class="value">1.4억</div><div class="label">일간 모바일 유저</div></div>
+      <div class="kpi-item"><div class="value">3~5x</div><div class="label">인스타 대비 도달률</div></div>
+      <div class="kpi-item"><div class="value">Q4</div><div class="label">무료성장 마감시한</div></div>
+    </div>
+
+    <div class="highlight">
+      <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#cc3d00" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> 핵심 포인트</h4>
+      <p>스레드는 지금 <em>"알고리즘의 축복기"</em>에 있다. 팔로워 0명인 신규 계정의 글도 내용이 좋으면 수만 명에게 노출되는 구조다. 인스타그램에서 1년 걸릴 팔로워를 스레드에서는 1달 만에 달성한 사례가 속출하고 있으며, Q4 2026 광고 CPM이 본격적으로 오르기 전 <em>지금이 마지막 무료 성장 구간</em>이다.</p>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- 알고리즘 -->
+<section id="algorithm">
+  <div class="container">
+    <div class="section-label">01 — Algorithm</div>
+    <div class="section-title">2026 메타 스레드 알고리즘 해부</div>
+    <div class="section-desc">Adam Mosseri 공식 발언 + 250만 포스트 데이터 분석 기반 핵심 랭킹 시그널.</div>
+
+    <div class="algo-list">
+      <div class="algo-item"><div class="algo-rank">#1</div><div class="algo-body"><h4>초기 참여 속도 (First-Hour Velocity)</h4><p>포스팅 후 30~90분 내 댓글 수가 확산 여부를 결정. 30분 내 50개 반응 > 24시간 100개.</p></div><div class="algo-badge badge-critical">최우선</div></div>
+      <div class="algo-item"><div class="algo-rank">#2</div><div class="algo-body"><h4>답글 품질 (Reply Depth)</h4><p>이모지 한 줄보다 2줄 이상 대화형 답글이 훨씬 높은 가중치. 대화를 만드는 글이 이긴다.</p></div><div class="algo-badge badge-critical">최우선</div></div>
+      <div class="algo-item"><div class="algo-rank">#3</div><div class="algo-body"><h4>상호작용 이력 (Interaction History)</h4><p>이전에 소통한 적 있는 계정의 콘텐츠를 For You에서 우선 노출.</p></div><div class="algo-badge badge-high">높음</div></div>
+      <div class="algo-item"><div class="algo-rank">#4</div><div class="algo-body"><h4>콘텐츠 형식 보너스</h4><p>사진 포함 시 참여율 60%↑. 영상+텍스트 캡션이 조회수 최고. 태그는 1개만.</p></div><div class="algo-badge badge-medium">중간</div></div>
+      <div class="algo-item"><div class="algo-rank">#5</div><div class="algo-body"><h4>일관성 & 활동량</h4><p>하루 1~3회 포스팅 + 타인 글에 적극 답글. 답글도 포스팅으로 카운트.</p></div><div class="algo-badge badge-medium">중간</div></div>
+    </div>
+
+    <div class="highlight" style="margin-top: 24px;">
+      <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#cc3d00" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Adam Mosseri 직접 발언</h4>
+      <p>"성장하려면 <em>포스팅보다 답글을 훨씬 더 많이 하라.</em>" 스레드의 핵심은 대화다. 방송이 아니라 대화를 하는 계정이 알고리즘의 선택을 받는다.</p>
+    </div>
+
+    <div class="ratio-bar">
+      <div class="ratio-major">답글 80%</div>
+      <div class="ratio-minor">포스팅 20%</div>
+    </div>
+    <p style="font-size:12px; color:var(--text-muted); text-align:center;">하루 스레드 활동 시간의 최적 배분 비율</p>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- 전략 -->
+<section id="strategy">
+  <div class="container">
+    <div class="section-label">02 — Strategy</div>
+    <div class="section-title">팔로워 폭발을 만드는 6대 전략</div>
+    <div class="section-desc">알고리즘에 최적화된 6가지 성장 엔진. 동시에 가동할수록 시너지 폭발.</div>
+
+    <div class="strategy-grid">
+      <div class="s-card">
+        <div class="s-card-head">
+          <div class="s-card-icon"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          <div class="s-card-num">STRATEGY 01</div>
+        </div>
+        <h3>바이럴 트리거 포스트</h3>
+        <p>하루 1개 "논쟁형 핫테이크" 발행. 사람들이 의견이 갈리는 주제를 던져 답글 폭발 유도. 답글 수 = 알고리즘 확산 연료.</p>
+        <div class="impact impact-max">Impact 최상</div>
+      </div>
+      <div class="s-card">
+        <div class="s-card-head">
+          <div class="s-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+          <div class="s-card-num">STRATEGY 02</div>
+        </div>
+        <h3>무료 리소스 DM 이벤트</h3>
+        <p>매일 다른 무료 리소스를 "댓글 달면 DM으로 보내드립니다" 방식으로 배포. 댓글이 알고리즘을 트리거.</p>
+        <div class="impact impact-max">Impact 최상</div>
+      </div>
+      <div class="s-card">
+        <div class="s-card-head">
+          <div class="s-card-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div class="s-card-num">STRATEGY 03</div>
+        </div>
+        <h3>전략적 답글 폭격</h3>
+        <p>니치 인플루언서 상위 30명 타겟. 가치 있는 2~3줄 답글을 매일 15개+ 작성. 프로필 방문 → 팔로우 유입.</p>
+        <div class="impact impact-high">Impact 상</div>
+      </div>
+      <div class="s-card">
+        <div class="s-card-head">
+          <div class="s-card-icon"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
+          <div class="s-card-num">STRATEGY 04</div>
+        </div>
+        <h3>크로스 플랫폼 동원</h3>
+        <p>인스타, 카톡, 오픈채팅 등 기존 채널에서 스레드 포스트 공유 → 초기 30분 참여 속도 부스터.</p>
+        <div class="impact impact-high">Impact 상</div>
+      </div>
+      <div class="s-card">
+        <div class="s-card-head">
+          <div class="s-card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v2"/></svg></div>
+          <div class="s-card-num">STRATEGY 05</div>
+        </div>
+        <h3>7일 챌린지 이벤트</h3>
+        <p>참가 조건: 팔로우 + 매일 인증 댓글. 완주자에게 혜택. 참여자끼리 리포스트 → 네트워크 효과 폭발.</p>
+        <div class="impact impact-max">Impact 최상</div>
+      </div>
+      <div class="s-card">
+        <div class="s-card-head">
+          <div class="s-card-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+          <div class="s-card-num">STRATEGY 06</div>
+        </div>
+        <h3>데이터 투명 공개</h3>
+        <p>실제 수익, 성과, 비용을 솔직하게 공개하는 시리즈. 숫자가 있으면 신뢰가 생기고 바이럴이 터진다.</p>
+        <div class="impact impact-high">Impact 상</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- 7일 타임라인 -->
+<section id="timeline">
+  <div class="container">
+    <div class="section-label">03 — Execution</div>
+    <div class="section-title">7일 실행 타임라인</div>
+    <div class="section-desc">매일 무엇을 해야 하는지, 시간대까지 포함한 구체적 액션 플랜.</div>
+
+    <div class="tl">
+      <div class="tl-item">
+        <div class="tl-day">DAY 1</div>
+        <h3>프로필 최적화 + 챌린지 론칭</h3>
+        <p>프로필 바이오를 니치에 맞게 재작성. 고정 글 설정. 외부 링크 삽입. "7일 챌린지" 시작 공지 + 기존 채널에 참여 독려.</p>
+        <div class="tl-tags"><span class="tl-tag">오전 9시 챌린지 공지</span><span class="tl-tag">오후 12시 핫테이크</span><span class="tl-tag">답글 폭격 2시간</span></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">DAY 2</div>
+        <h3>DM 이벤트 #1 + 실적 공개</h3>
+        <p>"댓글에 'OO' 쓰면 DM으로 보내드립니다" 포스트 발행. 동시에 성과 데이터 투명 공개. 챌린지 참여자 댓글에 전부 답글.</p>
+        <div class="tl-tags"><span class="tl-tag">오전 10시 DM 이벤트</span><span class="tl-tag">오후 2시 데이터 공개</span><span class="tl-tag">답글 20개+</span></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">DAY 3</div>
+        <h3>업계 통념을 깨는 핫테이크</h3>
+        <p>사람들이 당연하게 믿는 것을 정면 반박. 의도적으로 반박 여지를 남겨 답글 토론 유도. DM 이벤트 #2 동시 진행.</p>
+        <div class="tl-tags"><span class="tl-tag">오전 9시 핫테이크</span><span class="tl-tag">오후 12시 DM 이벤트 #2</span><span class="tl-tag">답글 대응 2시간</span></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">DAY 4</div>
+        <h3>Before/After + 인스타 연동</h3>
+        <p>전/후 비교 이미지 포스트 (사진 = 참여율 60%↑). 인스타에도 동시 게시 → "스레드에서 풀버전" CTA.</p>
+        <div class="tl-tags"><span class="tl-tag">오전 10시 이미지 포스트</span><span class="tl-tag">인스타 동시게시</span><span class="tl-tag">리포스트 유도</span></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">DAY 5</div>
+        <h3>크리에이터 협업 + 가치 포스트</h3>
+        <p>같은 니치 크리에이터 2~3명과 "서로 계정 소개" 협업. 동시에 단계별 가이드 형태의 롱폼 포스트. DM 이벤트 #3.</p>
+        <div class="tl-tags"><span class="tl-tag">협업 DM 발송</span><span class="tl-tag">오전 9시 롱폼</span><span class="tl-tag">DM 이벤트 #3</span></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">DAY 6</div>
+        <h3>히트작 리포스트 + 마감 임박</h3>
+        <p>이번 주 최고 성과 포스트를 새로운 앵글로 리포스트. "챌린지 마감 D-1" 긴급성 메시지. 추가 이벤트 병행.</p>
+        <div class="tl-tags"><span class="tl-tag">히트작 리포스트</span><span class="tl-tag">긴급성 메시지</span><span class="tl-tag">추가 이벤트</span></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">DAY 7</div>
+        <h3>완주 축하 + 성장 결과 공개</h3>
+        <p>완주자 태그 포스트로 노출 극대화. "이번 주 성장 결과" 투명 공개. 다음 주 예고 → 이탈 방지. 혜택 DM 발송.</p>
+        <div class="tl-tags"><span class="tl-tag">완주자 태그 발표</span><span class="tl-tag">성장 결과 공개</span><span class="tl-tag">다음 주 예고</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- 콘텐츠 공식 -->
+<section id="content">
+  <div class="container">
+    <div class="section-label">04 — Content Formulas</div>
+    <div class="section-title">바이럴 콘텐츠 공식 5가지</div>
+    <div class="section-desc">검증된 템플릿. 자신의 분야에 맞게 내용만 바꿔서 바로 사용 가능.</div>
+
+    <div class="formula">
+      <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> 공식 1: 반직관 훅 (Contrarian Hook)</h3>
+      <p class="desc">대부분이 믿는 상식을 정면 반박 → 답글 폭발</p>
+      <div class="formula-example">"OO 하는데 3시간 쓰시죠?<br><br>저는 [방법]으로 이걸 30분에 끝냅니다.<br>'퀄리티가 떨어지지 않냐'고 묻는데,<br>지난달 결과: [구체적 성과].<br><br>궁금하면 '[키워드]'라고 댓글 달아주세요."</div>
+    </div>
+
+    <div class="formula">
+      <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 공식 2: 투명 숫자 공개 (Raw Data)</h3>
+      <p class="desc">실제 결과를 가감없이 공개</p>
+      <div class="formula-example">"3월 실적 공개합니다.<br><br>→ [지표 A]: __<br>→ [지표 B]: __<br>→ [지표 C]: __<br><br>가장 잘 된 건 [X]. 가장 고전한 건 [Y].<br>뭐가 달랐는지는 다음 포스트에서."</div>
+    </div>
+
+    <div class="formula">
+      <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> 공식 3: 양자택일 (This or That)</h3>
+      <p class="desc">두 선택지 제시. 진입장벽 낮아 답글 극대화</p>
+      <div class="formula-example">"[주제]를 시작한다면,<br><br>A. [선택지 A — 쉽지만 느린 방법]<br>B. [선택지 B — 어렵지만 빠른 방법]<br><br>어떤 게 맞다고 생각하세요?<br>(정답 공유는 내일 이 계정에서)"</div>
+    </div>
+
+    <div class="formula">
+      <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> 공식 4: 마이크로 튜토리얼 (Quick Win)</h3>
+      <p class="desc">3분 안에 따라할 수 있는 초간단 튜토리얼</p>
+      <div class="formula-example">"[과제], 1분이면 끝납니다.<br><br>1단계: [단계 1]<br>2단계: [단계 2]<br>3단계: [단계 3]<br><br>전체 가이드 필요하면 '[키워드]'라고 댓글."</div>
+    </div>
+
+    <div class="formula">
+      <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> 공식 5: 개인 스토리 (Personal Arc)</h3>
+      <p class="desc">실패 → 전환점 → 현재 결과. 진정성이 무기.</p>
+      <div class="formula-example">"[이전 상태]에서 [위기]가 왔습니다.<br><br>그래서 방향을 바꿨습니다. [전환 행동].<br><br>지금은 [현재 성과 1], [현재 성과 2], [현재 성과 3].<br><br>[이전] → [현재]. 전환한 지 [기간]도 안 됐습니다."</div>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- 포스팅 시간 -->
+<section>
+  <div class="container">
+    <div class="section-label">05 — Timing</div>
+    <div class="section-title">최적 포스팅 시간 (한국 기준)</div>
+
+    <table class="timing-table">
+      <thead><tr><th>요일</th><th>최적 시간</th><th>참여지수</th><th>추천 콘텐츠</th></tr></thead>
+      <tbody>
+        <tr><td class="td-bold">월</td><td class="td-mono">09:00 / 12:00</td><td class="td-mono td-green">■■■□□</td><td>교육형</td></tr>
+        <tr><td class="td-bold">화</td><td class="td-mono">10:00</td><td class="td-mono td-green">■■■■□</td><td>데이터 공개</td></tr>
+        <tr><td class="td-bold">수</td><td class="td-mono td-accent">09:00 BEST</td><td class="td-mono td-accent">■■■■■</td><td>핫테이크</td></tr>
+        <tr><td class="td-bold">목</td><td class="td-mono td-accent">09:00 BEST</td><td class="td-mono td-accent">■■■■■</td><td>DM 이벤트</td></tr>
+        <tr><td class="td-bold">금</td><td class="td-mono">10:00</td><td class="td-mono td-green">■■■■□</td><td>개인 스토리</td></tr>
+        <tr><td class="td-bold">토</td><td class="td-mono">10:00</td><td class="td-mono td-green">■■■□□</td><td>양자택일</td></tr>
+        <tr><td class="td-bold">일</td><td class="td-mono">11:00</td><td class="td-mono td-green">■■■□□</td><td>주간 회고</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight">
+      <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#cc3d00" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 골든 타임 규칙</h4>
+      <p>포스팅 후 <em>30분간 반드시 스레드에 상주.</em> 모든 댓글에 즉시 답글 → 알고리즘이 "활발한 대화" 감지 → For You 확산 트리거. 이 30분이 하루 성과의 80%를 결정한다.</p>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- 일일 루틴 -->
+<section>
+  <div class="container">
+    <div class="section-label">06 — Daily Routine</div>
+    <div class="section-title">매일 반복할 스레드 루틴</div>
+
+    <div style="border:1px solid var(--border); border-radius:12px; padding:24px;">
+      <ul class="checklist">
+        <li><span class="check-time">08:30</span><div class="check-dot"></div>타겟 인플루언서 10명 포스트에 가치 답글 10개</li>
+        <li><span class="check-time">09:00</span><div class="check-dot"></div>메인 포스트 발행 (공식 5가지 중 택 1)</li>
+        <li><span class="check-time">09:00</span><div class="check-dot" style="background:var(--red)"></div>골든타임 30분: 모든 댓글에 즉시 답글</li>
+        <li><span class="check-time">09:30</span><div class="check-dot"></div>니치 관련 글 5개에 인사이트 답글</li>
+        <li><span class="check-time">12:00</span><div class="check-dot"></div>서브 포스트 발행 (DM 이벤트 or 질문형)</li>
+        <li><span class="check-time">12:00</span><div class="check-dot" style="background:var(--red)"></div>골든타임 #2: 서브 포스트 답글 대응 30분</li>
+        <li><span class="check-time">15:00</span><div class="check-dot"></div>기존 채널에 오늘의 포스트 공유 (인스타/카톡)</li>
+        <li><span class="check-time">20:00</span><div class="check-dot"></div>DM 이벤트 참여자에게 일괄 DM 발송</li>
+        <li><span class="check-time">21:00</span><div class="check-dot"></div>내일 포스트 초안 + 오늘 성과 분석</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- 부스터 -->
+<section>
+  <div class="container">
+    <div class="section-label">07 — Boosters</div>
+    <div class="section-title">추가 성장 부스터</div>
+
+    <div class="booster-grid">
+      <div class="booster"><div class="booster-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h4>커뮤니티 동원</h4><p>기존 커뮤니티에 매일 핵심 포스트 공유 → 초기 참여 속도 확보</p></div>
+      <div class="booster"><div class="booster-icon"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div><h4>인스타 스토리 브릿지</h4><p>인기 포스트 스크린샷 → "전체는 스레드에서" CTA</p></div>
+      <div class="booster"><div class="booster-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><h4>무료 도구 배포</h4><p>팔로우+댓글 조건으로 배포. 도구 자체가 바이럴</p></div>
+      <div class="booster"><div class="booster-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><h4>콘텐츠 쪼개기</h4><p>긴 콘텐츠 핵심을 3~4줄 시리즈로 매일 1개씩</p></div>
+      <div class="booster"><div class="booster-icon"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><h4>비하인드 씬</h4><p>작업 과정 실시간 공유 → 진정성 + 궁금증 유발</p></div>
+      <div class="booster"><div class="booster-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h4>크리에이터 협업</h4><p>비슷한 규모끼리 상호 소개 → 팔로워 풀 교환</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- 시나리오 -->
+<section>
+  <div class="container">
+    <div class="section-label">08 — Scenarios</div>
+    <div class="section-title">7일 성장 시나리오</div>
+
+    <div class="scenario-grid">
+      <div class="scenario scenario-best"><h4>최선</h4><div class="s-num">5~7일</div><p>바이럴 2~3개 터짐<br>일 1,000~1,500+</p></div>
+      <div class="scenario scenario-base"><h4>기본</h4><div class="s-num">7~10일</div><p>꾸준한 실행<br>일 600~800명</p></div>
+      <div class="scenario scenario-worst"><h4>보수적</h4><div class="s-num">14~18일</div><p>바이럴 없이 유기적<br>일 300~400명</p></div>
+    </div>
+
+    <div class="highlight">
+      <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#cc3d00" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> 핵심 변수</h4>
+      <p>결과의 차이를 만드는 건 <em>바이럴 포스트 1개의 유무</em>다. 7일 중 답글 100개+ 포스트가 1개라도 나오면 계단식 성장이 시작된다.</p>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- Do / Don't -->
+<section>
+  <div class="container">
+    <div class="section-label">09 — Rules</div>
+    <div class="section-title">필수 수칙 / 절대 금지</div>
+
+    <div class="do-dont">
+      <div class="dont-box">
+        <h3>× 절대 금지</h3>
+        <p>• 팔로우/언팔 반복 (계정 제한)<br>• 봇/자동 댓글 (섀도우밴)<br>• 태그 2개 이상 (스팸 처리)<br>• 외부 링크만 있는 포스트<br>• 홍보 일색의 영업형 글<br>• 이모지만 있는 빈 답글</p>
+      </div>
+      <div class="do-box">
+        <h3>○ 필수 수칙</h3>
+        <p>• 매일 최소 1포스트 + 15답글<br>• 포스팅 후 30분 상주 필수<br>• 답글은 2줄 이상 가치 있게<br>• DM 약속 반드시 이행<br>• 한국 스레드 반말 톤 유지<br>• 모든 답글에 재답글 달기</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- 요약 -->
+<section>
+  <div class="container">
+    <div class="section-label">10 — Summary</div>
+    <div class="section-title">실행 요약</div>
+
+    <div class="summary-box">
+      <h3>폭발성장 핵심 원칙</h3>
+      <div class="summary-row"><div class="summary-label">알고리즘 핵심</div><div class="summary-val">답글 > 좋아요 > 조회수. 대화를 만드는 계정이 이긴다.</div></div>
+      <div class="summary-row"><div class="summary-label">시간 배분</div><div class="summary-val">답글 80% / 포스팅 20%. 남의 글에서 존재감을 먼저.</div></div>
+      <div class="summary-row"><div class="summary-label">골든 타임</div><div class="summary-val">포스팅 후 30분이 승부처. 모든 댓글에 즉시 대응.</div></div>
+      <div class="summary-row"><div class="summary-label">일일 최소량</div><div class="summary-val">포스트 2~3개 + 가치 답글 15~20개 + DM 이벤트 1개.</div></div>
+      <div class="summary-row"><div class="summary-label">크로스 플랫폼</div><div class="summary-val">기존 커뮤니티 = 초기 참여 엔진. 인스타 = 유입 브릿지.</div></div>
+      <div class="summary-row"><div class="summary-label">바이럴 키</div><div class="summary-val">매일 핫테이크 1개 필수. 답글 100개+ 포스트가 곡선을 꺾는다.</div></div>
+      <div class="summary-row" style="border:none;"><div class="summary-label">마감 시한</div><div class="summary-val">Q4 2026 이전이 마지막 무료 성장 기회. 지금 시작하라.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <p style="font-size:13px; color:var(--text-secondary); margin-bottom:8px;">이 자료가 도움이 됐다면 스레드에서 공유해주세요</p>
+    <p><span class="footer-brand">스레드 팔로워 폭발성장전략</span> · 2026년 4월</p>
+    <p style="margin-top:4px;">데이터: Buffer 250만 포스트, Adam Mosseri 공식 발언, TechCrunch, 디지털데일리</p>
+  </div>
+</footer>
+
+</body>
+</html>
